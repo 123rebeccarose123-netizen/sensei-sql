@@ -12,14 +12,14 @@ load_dotenv()
 st.set_page_config(page_title="SenseiSQL", layout="wide")
 
 # API Configuration
-api_key = os.getenv("GOOGLE_API_KEY")
+# Replace your old API Configuration section with this:
+api_key = os.getenv("GOOGLE_API_KEY") or st.secrets.get("GOOGLE_API_KEY")
+
 if api_key:
     genai.configure(api_key=api_key)
-    # Using the flash model because it is lightweight for your 4GB RAM
-    model = genai.GenerativeModel('gemini-1.5-flash')
-    st.sidebar.success("🥷 Sensei is Awake!")
+    # ... rest of your model setup
 else:
-    st.sidebar.error("⚠️ Missing API Key in .env!")
+    st.error("API Key not found! Please check your Streamlit Secrets.")
 
 # 2. HELPER FUNCTIONS
 def clean_col(name):
