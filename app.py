@@ -37,20 +37,26 @@ st.markdown('<h1 class="main-title">SENSEI SQL</h1>', unsafe_allow_html=True)
 def get_gemini_sql(question, schema):
     prompt = f"Convert to SQLite: '{question}'. Table:'data_table'. Cols:{schema}. SQL ONLY."
     
-    # These names are more likely to be accepted by your current API version
-    models_to_try = ['gemini-1.5-flash', 'gemini-pro']
+    # Trying EVERY possible naming convention for your API key
+    models_to_try = [
+        'gemini-1.5-flash', 
+        'gemini-1.0-pro', 
+        'gemini-pro',
+        'models/gemini-1.5-flash',
+        'models/gemini-pro'
+    ]
     
     for model_name in models_to_try:
         try:
             model = genai.GenerativeModel(model_name)
             response = model.generate_content(prompt)
-            # This part removes the ```sql wrapper and any trailing semicolons
+            # This cleans the AI output so it's pure SQL
             sql = response.text.strip().replace('```sql', '').replace('```', '').replace(';', '')
             return sql
         except Exception:
             continue
             
-    raise Exception("API Key connection failed. Check your Google AI Studio dashboard permissions.")
+    raise Exception("API Key connection failed. Please go to https://aistudio.google.com/ and create a NEW API Key.")
 
 # 4. DATA WORKFLOW
 uploaded_file = st.file_uploader("", type="csv") 
