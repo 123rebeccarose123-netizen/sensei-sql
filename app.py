@@ -33,24 +33,24 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 st.markdown('<h1 class="main-title">SENSEI SQL</h1>', unsafe_allow_html=True)
-
-# 3. ROBUST AI LOGIC
+#-----------
 def get_gemini_sql(question, schema):
-    prompt = f"Expert SQL assistant. Table: 'data_table'. Columns: {schema}. Task: Convert '{question}' to SQLite SQL. Output ONLY the code."
+    prompt = f"Convert to SQLite: '{question}'. Table:'data_table'. Cols:{schema}. SQL ONLY."
     
-    # We try multiple names for the model to bypass environment errors
-    models_to_try = ['gemini-1.5-flash', 'gemini-pro', 'models/gemini-pro']
+    # These names are more likely to be accepted by your current API version
+    models_to_try = ['gemini-1.5-flash', 'gemini-pro']
     
     for model_name in models_to_try:
         try:
             model = genai.GenerativeModel(model_name)
             response = model.generate_content(prompt)
-            return response.text.strip().replace('```sql', '').replace('```', '')
-        except Exception as e:
-            if "404" in str(e):
-                continue
-            raise e
-    raise Exception("All models returned 404. Check your requirements.txt version.")
+            # This part removes the ```sql wrapper and any trailing semicolons
+            sql = response.text.strip().replace('```sql', '').replace('```', '').replace(';', '')
+            return sql
+        except Exception:
+            continue
+            
+    raise Exception("API Key connection failed. Check your Google AI Studio dashboard permissions.")
 
 # 4. DATA WORKFLOW
 uploaded_file = st.file_uploader("", type="csv") 
