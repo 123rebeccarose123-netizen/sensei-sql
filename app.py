@@ -65,13 +65,10 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- 3. BRAIN INITIALIZATION ---
-load_dotenv()
-api_key = os.getenv("GOOGLE_API_KEY") or st.secrets.get("GOOGLE_API_KEY")
-
 if api_key:
     genai.configure(api_key=api_key)
-    # FIXED: Added 'models/' prefix to resolve the 404 error
-    model = genai.GenerativeModel('models/gemini-1.5-flash')
+    # UPDATED: Using the '-latest' suffix to bypass the 404/v1beta error
+    model = genai.GenerativeModel('gemini-1.5-flash-latest')
 else:
     st.error("API Key missing! Check Secrets.")
     st.stop()
