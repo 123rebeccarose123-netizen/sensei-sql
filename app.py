@@ -17,8 +17,14 @@ api_key = os.environ.get("GOOGLE_API_KEY") or st.secrets.get("GOOGLE_API_KEY")
 if not api_key:
     st.error("API Key missing! Add GOOGLE_API_KEY to Streamlit Secrets.")
     st.stop()
-
 genai.configure(api_key=api_key)
+
+# TEMP DEBUG - delete after testing
+models = [m.name for m in genai.list_models()]
+st.write(models)
+st.stop()
+
+
 
 # 2. UI STYLING
 st.set_page_config(page_title="SenseiSQL", layout="wide")
