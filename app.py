@@ -13,14 +13,11 @@ except ImportError:
     pass
 
 # Retrieve API Key safely
-# FORCE the app to use the Streamlit Secret
-api_key = st.secrets["GOOGLE_API_KEY"]
+# TEMPORARY DIAGNOSTIC - Use your real key here
+api_key = "AIzaSyB0qOwGBcN2TzYNYSIEV-HuH4QaJvMslQQ" # PASTE YOUR ACTUAL KEY INSIDE THESE QUOTES
 
-if api_key:
-    genai.configure(api_key=api_key)
-else:
-    st.error("Key still not found in Secrets box!")
-    st.stop()
+# Direct configuration
+genai.configure(api_key=api_key)
 
 # 2. UI STYLING
 st.set_page_config(page_title="SenseiSQL", layout="wide")
