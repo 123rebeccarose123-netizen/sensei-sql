@@ -14,11 +14,10 @@ except ImportError:
 
 # Retrieve API Key safely
 # TEMPORARY DIAGNOSTIC - Use your real key here
-api_key = "AIzaSyB0qOwGBcN2TzYNYSIEV-HuH4QaJvMslQQ" # PASTE YOUR ACTUAL KEY INSIDE THESE QUOTES
-
-# Direct configuration
-genai.configure(api_key=api_key)
-
+api_key = os.environ.get("GOOGLE_API_KEY") or st.secrets.get("GOOGLE_API_KEY")
+if not api_key:
+    st.error("API Key missing!")
+    st.stop()
 # 2. UI STYLING
 st.set_page_config(page_title="SenseiSQL", layout="wide")
 st.markdown("""
