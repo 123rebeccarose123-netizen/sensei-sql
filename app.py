@@ -13,12 +13,13 @@ except ImportError:
     pass
 
 # Retrieve API Key safely
-api_key = os.environ.get("GOOGLE_API_KEY") or st.secrets.get("GOOGLE_API_KEY")
+# FORCE the app to use the Streamlit Secret
+api_key = st.secrets["GOOGLE_API_KEY"]
 
 if api_key:
     genai.configure(api_key=api_key)
 else:
-    st.error("API Key missing! Configure GOOGLE_API_KEY in Streamlit Secrets.")
+    st.error("Key still not found in Secrets box!")
     st.stop()
 
 # 2. UI STYLING
