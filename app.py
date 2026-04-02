@@ -42,4 +42,28 @@ def get_gemini_sql(question, schema):
         sql = response.text.strip().replace('```sql', '').replace('```', '').replace(';', '').strip()
         return sql
     except Exception as e:
-        raise Exceptio
+        raise Exception(f"Gemini error: {str(e)}")
+
+# 4. DATA WORKFLOW
+uploaded_file = st.file_uploader("Upload a CSV file", type="csv")
+
+if uploaded_file is not None:
+    df = pd.read_csv(uploaded_file)
+    df.columns = [re.sub(r'\W+', '_', c.strip().lower()) for c in df.columns]
+    engine = create_engine('sqlite:///:memory:')
+    df.to_sql('data_table', engine, index=False, if_exists='replace')
+
+    st.dataframe(df, use_container_width=True)
+    user_query = st.chat_input("Ask Sensei...")
+
+    if user_query:
+        with st.spinner("Calculating..."):
+            try:
+                schema = ", ".join(df.columns)
+                sql = get_gemini_sql(user_query, schema)
+                with engine.connect() as conn:
+                    result = pd.read_sql_query(text(sql), conn)
+                st.code(sql, language="sql")
+                st.dataframe(result, use_container_width=True)
+            except Exception as e:
+                st.error(f"Error: {e}")
