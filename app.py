@@ -36,9 +36,8 @@ st.markdown('<h1 class="main-title">SENSEI SQL</h1>', unsafe_allow_html=True)
 # 3. GEMINI FUNCTION
 def get_gemini_sql(question, schema):
     prompt = f"Convert to SQLite: '{question}'. Table:'data_table'. Cols:{schema}. SQL ONLY, no explanation, no markdown."
-    
     try:
-       model = genai.GenerativeModel('gemini-pro')
+        model = genai.GenerativeModel('gemini-pro')
         response = model.generate_content(prompt)
         sql = response.text.strip().replace('```sql', '').replace('```', '').replace(';', '').strip()
         return sql
@@ -54,7 +53,7 @@ if uploaded_file is not None:
     engine = create_engine('sqlite:///:memory:')
     df.to_sql('data_table', engine, index=False, if_exists='replace')
 
-    st.dataframe(df, use_container_width=True)  # ✅ shows ALL rows and columns
+    st.dataframe(df, use_container_width=True)
     user_query = st.chat_input("Ask Sensei...")
 
     if user_query:
@@ -68,4 +67,3 @@ if uploaded_file is not None:
                 st.dataframe(result, use_container_width=True)
             except Exception as e:
                 st.error(f"Error: {e}")
-             
