@@ -13,11 +13,13 @@ except ImportError:
     pass
 
 # Retrieve API Key safely
-# TEMPORARY DIAGNOSTIC - Use your real key here
 api_key = os.environ.get("GOOGLE_API_KEY") or st.secrets.get("GOOGLE_API_KEY")
 if not api_key:
-    st.error("API Key missing!")
+    st.error("API Key missing! Add GOOGLE_API_KEY to Streamlit Secrets.")
     st.stop()
+
+genai.configure(api_key=api_key)
+
 # 2. UI STYLING
 st.set_page_config(page_title="SenseiSQL", layout="wide")
 st.markdown("""
@@ -30,43 +32,31 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 st.markdown('<h1 class="main-title">SENSEI SQL</h1>', unsafe_allow_html=True)
-#-----------
+
+# 3. GEMINI FUNCTION
 def get_gemini_sql(question, schema):
-    prompt = f"Convert to SQLite: '{question}'. Table:'data_table'. Cols:{schema}. SQL ONLY."
+    prompt = f"Convert to SQLite: '{question}'. Table:'data_table'. Cols:{schema}. SQL ONLY, no explanation, no markdown."
     
-    # Trying EVERY possible naming convention for your API key
-    models_to_try = [
-        'gemini-1.5-flash', 
-        'gemini-1.0-pro', 
-        'gemini-pro',
-        'models/gemini-1.5-flash',
-        'models/gemini-pro'
-    ]
-    
-    for model_name in models_to_try:
-        try:
-            model = genai.GenerativeModel(model_name)
-            response = model.generate_content(prompt)
-            # This cleans the AI output so it's pure SQL
-            sql = response.text.strip().replace('```sql', '').replace('```', '').replace(';', '')
-            return sql
-        except Exception:
-            continue
-            
-    raise Exception("API Key connection failed. Please go to https://aistudio.google.com/ and create a NEW API Key.")
+    try:
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        response = model.generate_content(prompt)
+        sql = response.text.strip().replace('```sql', '').replace('```', '').replace(';', '').strip()
+        return sql
+    except Exception as e:
+        raise Exception(f"Gemini error: {str(e)}")
 
 # 4. DATA WORKFLOW
-uploaded_file = st.file_uploader("", type="csv") 
+uploaded_file = st.file_uploader("Upload a CSV file", type="csv")
 
 if uploaded_file is not None:
     df = pd.read_csv(uploaded_file)
     df.columns = [re.sub(r'\W+', '_', c.strip().lower()) for c in df.columns]
     engine = create_engine('sqlite:///:memory:')
-    df.to_sql('data_table', engine, index=False)
-    
-    st.dataframe(df.head(10), use_container_width=True)
+    df.to_sql('data_table', engine, index=False, if_exists='replace')
+
+    st.dataframe(df, use_container_width=True)  # ✅ shows ALL rows and columns
     user_query = st.chat_input("Ask Sensei...")
-    
+
     if user_query:
         with st.spinner("Calculating..."):
             try:
@@ -77,6 +67,5 @@ if uploaded_file is not None:
                 st.code(sql, language="sql")
                 st.dataframe(result, use_container_width=True)
             except Exception as e:
-                import google.generativeai as gai
                 st.error(f"Error: {e}")
-                st.info(f"System Check: Library Version {gai.__version__}")
+             
