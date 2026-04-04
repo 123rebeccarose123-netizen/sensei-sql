@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import os
-import google.generativeai as genai
+from groq import Groq
 from sqlalchemy import create_engine, text
 import re
 
@@ -18,8 +18,8 @@ if not api_key:
     st.error("API Key missing! Add GOOGLE_API_KEY to Streamlit Secrets.")
     st.stop()
 
-genai.configure(api_key=api_key)
-st.write("Key being used:", api_key[:10]) 
+client = Groq(api_key=api_key)
+
 # 2. UI STYLING
 st.set_page_config(page_title="SenseiSQL", layout="wide")
 st.markdown("""
@@ -33,16 +33,18 @@ st.markdown("""
 
 st.markdown('<h1 class="main-title">SENSEI SQL</h1>', unsafe_allow_html=True)
 
-# 3. GEMINI FUNCTION
-def get_gemini_sql(question, schema):
+# 3. GROQ FUNCTION
+def get_sql(question, schema):
     prompt = f"Convert to SQLite: '{question}'. Table:'data_table'. Cols:{schema}. SQL ONLY, no explanation, no markdown."
     try:
-        model = genai.GenerativeModel('gemini-2.0-flash-lite')
-        response = model.generate_content(prompt)
-        sql = response.text.strip().replace('```sql', '').replace('```', '').replace(';', '').strip()
+        response = client.chat.completions.create(
+            model="llama3-8b-8192",
+            messages=[{"role": "user", "content": prompt}]
+        )
+        sql = response.choices[0].message.content.strip().replace('```sql', '').replace('```', '').replace(';', '').strip()
         return sql
     except Exception as e:
-        raise Exception(f"Gemini error: {str(e)}")
+        raise Exception(f"Error: {str(e)}")
 
 # 4. DATA WORKFLOW
 uploaded_file = st.file_uploader("Upload a CSV file", type="csv")
@@ -60,7 +62,7 @@ if uploaded_file is not None:
         with st.spinner("Calculating..."):
             try:
                 schema = ", ".join(df.columns)
-                sql = get_gemini_sql(user_query, schema)
+                sql = get_sql(user_query, schema)
                 with engine.connect() as conn:
                     result = pd.read_sql_query(text(sql), conn)
                 st.code(sql, language="sql")
