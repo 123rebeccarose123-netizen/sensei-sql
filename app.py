@@ -19,7 +19,7 @@ if not api_key:
     st.stop()
 
 genai.configure(api_key=api_key)
-
+st.write("Key being used:", api_key[:10]) 
 # 2. UI STYLING
 st.set_page_config(page_title="SenseiSQL", layout="wide")
 st.markdown("""
