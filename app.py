@@ -38,7 +38,7 @@ def get_sql(question, schema):
     prompt = f"Convert to SQLite: '{question}'. Table:'data_table'. Cols:{schema}. SQL ONLY, no explanation, no markdown."
     try:
         response = client.chat.completions.create(
-            model="llama3-8b-8192",
+            model="llama-3.3-70b-versatile",
             messages=[{"role": "user", "content": prompt}]
         )
         sql = response.choices[0].message.content.strip().replace('```sql', '').replace('```', '').replace(';', '').strip()
