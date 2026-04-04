@@ -66,7 +66,4 @@ if uploaded_file is not None:
                 st.code(sql, language="sql")
                 st.dataframe(result, use_container_width=True)
             except Exception as e:
-                if "429" in str(e):
-                    st.warning("⏳ Sensei is resting... API limit reached. Please try again in a few minutes!")
-                else:
-                    st.error(f"Error: {e}")
+                st.error(f"Error: {e}")
