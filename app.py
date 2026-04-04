@@ -138,7 +138,8 @@ st.markdown(f"""
 # TOGGLE BUTTON
 col_spacer, col_btn = st.columns([10, 1])
 with col_btn:
-    st.button(btn_label, on_click=toggle_theme)
+    st.button(btn_label, on_click=toggle_theme) 
+st.info("⏳ If this is your first visit, the app may take 30 seconds to wake up. Please be patient!")
 
 st.markdown(f'<h1 class="main-title">SENSEI SQL</h1>', unsafe_allow_html=True)
 st.markdown(f'''
