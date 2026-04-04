@@ -37,7 +37,7 @@ st.markdown('<h1 class="main-title">SENSEI SQL</h1>', unsafe_allow_html=True)
 def get_gemini_sql(question, schema):
     prompt = f"Convert to SQLite: '{question}'. Table:'data_table'. Cols:{schema}. SQL ONLY, no explanation, no markdown."
     try:
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel('gemini-2.0-flash')
         response = model.generate_content(prompt)
         sql = response.text.strip().replace('```sql', '').replace('```', '').replace(';', '').strip()
         return sql
